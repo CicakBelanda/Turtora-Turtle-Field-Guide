@@ -173,6 +173,147 @@
     return results;
 }
 
+- (NSArray *)fetchCategories {
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Species"];
+    fetchRequest.propertiesToFetch = @[@"category"];
+    fetchRequest.returnsDistinctResults = YES;
+    fetchRequest.resultType = NSDictionaryResultType;
+    
+    NSError *error = nil;
+    NSArray *results = [self.persistentContainer.viewContext executeFetchRequest:fetchRequest error:&error];
+    if (error) {
+        NSLog(@"Fetch error: %@", error);
+        return @[];
+    }
+    
+    NSMutableArray *categories = [NSMutableArray array];
+    for (NSDictionary *dict in results) {
+        NSString *category = dict[@"category"];
+        if (category) {
+            [categories addObject:category];
+        }
+    }
+    return [categories sortedArrayUsingSelector:@selector(compare:)];
+}
+
+- (NSArray *)fetchFamilies {
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Family"];
+    NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES];
+    fetchRequest.sortDescriptors = @[sortDescriptor];
+    
+    NSError *error = nil;
+    NSArray *results = [self.persistentContainer.viewContext executeFetchRequest:fetchRequest error:&error];
+    if (error) {
+        NSLog(@"Fetch error: %@", error);
+        return @[];
+    }
+    return results;
+}
+
+- (NSArray *)fetchOrders {
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Order"];
+    NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES];
+    fetchRequest.sortDescriptors = @[sortDescriptor];
+    
+    NSError *error = nil;
+    NSArray *results = [self.persistentContainer.viewContext executeFetchRequest:fetchRequest error:&error];
+    if (error) {
+        NSLog(@"Fetch error: %@", error);
+        return @[];
+    }
+    return results;
+}
+
+- (NSArray *)fetchFamiliesForOrder:(NSManagedObject *)order {
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Family"];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"order == %@", order];
+    NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES];
+    fetchRequest.sortDescriptors = @[sortDescriptor];
+    
+    NSError *error = nil;
+    NSArray *results = [self.persistentContainer.viewContext executeFetchRequest:fetchRequest error:&error];
+    if (error) {
+        NSLog(@"Fetch error: %@", error);
+        return @[];
+    }
+    return results;
+}
+
+- (NSArray *)fetchGeneraForFamily:(NSManagedObject *)family {
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Genus"];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"family == %@", family];
+    NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES];
+    fetchRequest.sortDescriptors = @[sortDescriptor];
+    
+    NSError *error = nil;
+    NSArray *results = [self.persistentContainer.viewContext executeFetchRequest:fetchRequest error:&error];
+    if (error) {
+        NSLog(@"Fetch error: %@", error);
+        return @[];
+    }
+    return results;
+}
+
+- (NSArray *)fetchSpeciesForGenus:(NSManagedObject *)genus {
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:@"Species"];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"genus == %@", genus];
+    NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"commonName" ascending:YES];
+    fetchRequest.sortDescriptors = @[sortDescriptor];
+    
+    NSError *error = nil;
+    NSArray *results = [self.persistentContainer.viewContext executeFetchRequest:fetchRequest error:&error];
+    if (error) {
+        NSLog(@"Fetch error: %@", error);
+        return @[];
+    }
+    return results;
+}
+
+- (NSArray *)fetchRecentSpecies:(NSInteger)limit {
+    NSArray *recentIDs = [[NSUserDefaults standardUserDefaults] arrayForKey:@"recentSpeciesIDs"];
+    if (!recentIDs || recentIDs.count == 0) {
+        return @[];
+    }
+    
+    NSMutableArray *species = [NSMutableArray array];
+    for (NSString *idString in recentIDs) {
+        NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:idString];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"id == %@", uuid];
+        NSArray *results = [self fetchSpeciesWithPredicate:predicate];
+        if (results.count > 0) {
+            [species addObject:results[0]];
+        }
+    }
+    
+    // Return only up to limit
+    if (species.count > limit) {
+        return [species subarrayWithRange:NSMakeRange(0, limit)];
+    }
+    return species;
+}
+
+- (void)addRecentSpecies:(NSManagedObject *)species {
+    NSUUID *speciesID = [species valueForKey:@"id"];
+    NSString *idString = speciesID.UUIDString;
+    
+    NSMutableArray *recentIDs = [[[NSUserDefaults standardUserDefaults] arrayForKey:@"recentSpeciesIDs"] mutableCopy];
+    if (!recentIDs) {
+        recentIDs = [NSMutableArray array];
+    }
+    
+    // Remove if already exists (to move to front)
+    [recentIDs removeObject:idString];
+    // Insert at beginning
+    [recentIDs insertObject:idString atIndex:0];
+    // Keep only last 10
+    if (recentIDs.count > 10) {
+        [recentIDs removeObjectsInRange:NSMakeRange(10, recentIDs.count - 10)];
+    }
+    
+    [[NSUserDefaults standardUserDefaults] setObject:recentIDs forKey:@"recentSpeciesIDs"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 - (void)toggleFavoriteForSpecies:(NSManagedObject *)species {
     NSNumber *currentValue = [species valueForKey:@"isFavorite"];
     [species setValue:@(!currentValue.boolValue) forKey:@"isFavorite"];

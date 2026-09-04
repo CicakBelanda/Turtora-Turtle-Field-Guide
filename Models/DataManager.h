@@ -20,6 +20,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray *)fetchAllSpecies;
 - (NSArray *)fetchFavorites;
 - (NSArray *)fetchSpeciesWithPredicate:(NSPredicate *)predicate;
+- (NSArray *)fetchCategories;
+- (NSArray *)fetchFamilies;
+- (NSArray *)fetchRecentSpecies:(NSInteger)limit;
+- (NSArray *)fetchOrders;
+- (NSArray *)fetchFamiliesForOrder:(NSManagedObject *)order;
+- (NSArray *)fetchGeneraForFamily:(NSManagedObject *)family;
+- (NSArray *)fetchSpeciesForGenus:(NSManagedObject *)genus;
+- (void)addRecentSpecies:(NSManagedObject *)species;
 - (void)toggleFavoriteForSpecies:(NSManagedObject *)species;
 - (void)saveContext;
 
