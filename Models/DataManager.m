@@ -69,12 +69,22 @@
         // Create Species
         NSManagedObject *species = [NSEntityDescription insertNewObjectForEntityForName:@"Species" inManagedObjectContext:context];
         
+        // Fallback: use scientificName if commonName is null
+        NSString *commonName = speciesDict[@"commonName"];
+        if (!commonName || [commonName isKindOfClass:[NSNull class]]) {
+            commonName = speciesDict[@"scientificName"];
+        }
+        NSString *category = speciesDict[@"category"];
+        if (!category || [category isKindOfClass:[NSNull class]]) {
+            category = @"Unknown";
+        }
+        
         [species setValue:[NSUUID UUID] forKey:@"id"];
-        [species setValue:speciesDict[@"commonName"] forKey:@"commonName"];
+        [species setValue:commonName forKey:@"commonName"];
         [species setValue:speciesDict[@"scientificName"] forKey:@"scientificName"];
         [species setValue:speciesDict[@"speciesDescription"] forKey:@"speciesDescription"];
         [species setValue:speciesDict[@"imageName"] forKey:@"imageName"];
-        [species setValue:speciesDict[@"category"] forKey:@"category"];
+        [species setValue:category forKey:@"category"];
         [species setValue:speciesDict[@"size"] forKey:@"size"];
         [species setValue:speciesDict[@"diet"] forKey:@"diet"];
         [species setValue:speciesDict[@"habitat"] forKey:@"habitat"];

@@ -49,7 +49,6 @@
     [self setupFeaturedSection];
     [self setupHabitatSection];
     [self setupFamilySection];
-    [self setupTaxonomySection];
     [self setupRecentSection];
     [self loadData];
 }
@@ -96,17 +95,6 @@
     self.searchController.searchBar.placeholder = @"Search species, family, genus...";
     self.searchController.searchBar.searchBarStyle = UISearchBarStyleMinimal;
     
-    // Add microphone button
-    UITextField *searchField = [self.searchController.searchBar valueForKey:@"searchField"];
-    if (searchField) {
-        UIButton *micButton = [UIButton buttonWithType:UIButtonTypeSystem];
-        [micButton setImage:[UIImage systemImageNamed:@"mic.fill"] forState:UIControlStateNormal];
-        micButton.tintColor = [UIColor systemGreenColor];
-        micButton.frame = CGRectMake(0, 0, 24, 24);
-        searchField.rightView = micButton;
-        searchField.rightViewMode = UITextFieldViewModeAlways;
-    }
-    
     UIView *searchContainer = [[UIView alloc] init];
     searchContainer.translatesAutoresizingMaskIntoConstraints = NO;
     [searchContainer addSubview:self.searchController.searchBar];
@@ -129,9 +117,9 @@
     // Collection view layout
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-    layout.itemSize = CGSizeMake(280, 200);
+    layout.itemSize = CGSizeMake([UIScreen mainScreen].bounds.size.width - 32, 220);
     layout.minimumInteritemSpacing = 12;
-    layout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0);
+    layout.sectionInset = UIEdgeInsetsMake(0, 20, 0, 20);
     
     self.featuredCollectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
     self.featuredCollectionView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -139,11 +127,12 @@
     self.featuredCollectionView.delegate = self;
     self.featuredCollectionView.showsHorizontalScrollIndicator = NO;
     self.featuredCollectionView.backgroundColor = [UIColor clearColor];
+    self.featuredCollectionView.decelerationRate = UIScrollViewDecelerationRateFast;
     [self.featuredCollectionView registerClass:[FeaturedSpeciesCell class] forCellWithReuseIdentifier:@"FeaturedCell"];
     [self.stackView addArrangedSubview:self.featuredCollectionView];
     
     [NSLayoutConstraint activateConstraints:@[
-        [self.featuredCollectionView.heightAnchor constraintEqualToConstant:200]
+        [self.featuredCollectionView.heightAnchor constraintEqualToConstant:220]
     ]];
     
     // Page control
@@ -153,6 +142,30 @@
     self.pageControl.pageIndicatorTintColor = [UIColor systemGray3Color];
     self.pageControl.hidesForSinglePage = YES;
     [self.stackView addArrangedSubview:self.pageControl];
+    [self.pageControl addTarget:self action:@selector(pageControlChanged:) forControlEvents:UIControlEventValueChanged];
+}
+
+- (void)pageControlChanged:(UIPageControl *)sender {
+    CGFloat itemWidth = [UIScreen mainScreen].bounds.size.width - 32 + 12;
+    CGFloat x = sender.currentPage * itemWidth;
+    [self.featuredCollectionView setContentOffset:CGPointMake(x, 0) animated:YES];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if (scrollView == self.featuredCollectionView) {
+        CGFloat itemWidth = [UIScreen mainScreen].bounds.size.width - 32 + 12;
+        NSInteger page = round(scrollView.contentOffset.x / itemWidth);
+        self.pageControl.currentPage = page;
+    }
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
+    if (scrollView == self.featuredCollectionView) {
+        CGFloat itemWidth = [UIScreen mainScreen].bounds.size.width - 32 + 12;
+        CGFloat targetX = targetContentOffset->x;
+        NSInteger page = round(targetX / itemWidth);
+        targetContentOffset->x = page * itemWidth;
+    }
 }
 
 - (void)setupHabitatSection {
@@ -180,57 +193,6 @@
     self.familyStackView.axis = UILayoutConstraintAxisVertical;
     self.familyStackView.spacing = 8;
     [self.stackView addArrangedSubview:self.familyStackView];
-}
-
-- (void)setupTaxonomySection {
-    SectionHeaderView *headerView = [[SectionHeaderView alloc] initWithTitle:@"Browse Taxonomy"];
-    [self.stackView addArrangedSubview:headerView];
-    
-    UIButton *taxonomyButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    taxonomyButton.translatesAutoresizingMaskIntoConstraints = NO;
-    taxonomyButton.backgroundColor = [UIColor tertiarySystemBackgroundColor];
-    taxonomyButton.layer.cornerRadius = 8;
-    taxonomyButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-    taxonomyButton.contentEdgeInsets = UIEdgeInsetsMake(12, 16, 12, 16);
-    taxonomyButton.titleEdgeInsets = UIEdgeInsetsMake(0, 12, 0, 0);
-    
-    // Icon
-    UIImage *icon = [UIImage systemImageNamed:@"list.bullet.indent"];
-    [taxonomyButton setImage:icon forState:UIControlStateNormal];
-    taxonomyButton.tintColor = [UIColor systemGreenColor];
-    
-    // Title
-    [taxonomyButton setTitle:@"Explore Classification" forState:UIControlStateNormal];
-    [taxonomyButton setTitleColor:[UIColor labelColor] forState:UIControlStateNormal];
-    taxonomyButton.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightMedium];
-    
-    // Subtitle
-    UILabel *subtitleLabel = [[UILabel alloc] init];
-    subtitleLabel.text = @"Order → Family → Genus → Species";
-    subtitleLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
-    subtitleLabel.textColor = [UIColor secondaryLabelColor];
-    subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [taxonomyButton addSubview:subtitleLabel];
-    [NSLayoutConstraint activateConstraints:@[
-        [subtitleLabel.leadingAnchor constraintEqualToAnchor:taxonomyButton.leadingAnchor constant:52],
-        [subtitleLabel.bottomAnchor constraintEqualToAnchor:taxonomyButton.bottomAnchor constant:-8]
-    ]];
-    
-    // Chevron
-    UIImageView *chevron = [[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"chevron.right"]];
-    chevron.tintColor = [UIColor systemGray3Color];
-    chevron.translatesAutoresizingMaskIntoConstraints = NO;
-    [taxonomyButton addSubview:chevron];
-    [NSLayoutConstraint activateConstraints:@[
-        [chevron.centerYAnchor constraintEqualToAnchor:taxonomyButton.centerYAnchor],
-        [chevron.trailingAnchor constraintEqualToAnchor:taxonomyButton.trailingAnchor constant:-16],
-        [chevron.widthAnchor constraintEqualToConstant:12],
-        [chevron.heightAnchor constraintEqualToConstant:12]
-    ]];
-    
-    [taxonomyButton addTarget:self action:@selector(taxonomyTapped) forControlEvents:UIControlEventTouchUpInside];
-    [self.stackView addArrangedSubview:taxonomyButton];
-    [taxonomyButton.heightAnchor constraintEqualToConstant:60].active = YES;
 }
 
 - (void)setupRecentSection {
@@ -358,12 +320,6 @@
     NSLog(@"Menu tapped");
 }
 
-- (void)taxonomyTapped {
-    TaxonomyExplorerViewController *taxonomyVC = [[TaxonomyExplorerViewController alloc] init];
-    taxonomyVC.currentLevel = TaxonomyLevelOrder;
-    [self.navigationController pushViewController:taxonomyVC animated:YES];
-}
-
 - (void)habitatTapped:(HabitatCardView *)sender {
     NSArray *categories = @[@"Marine Turtle", @"Freshwater Turtle", @"Tortoise"];
     NSString *category = categories[sender.tag];
@@ -382,14 +338,11 @@
     NSManagedObject *family = self.families[sender.tag];
     NSString *familyName = [family valueForKey:@"name"];
     
-    DataManager *dataManager = [DataManager sharedManager];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"genus.family.name == %@", familyName];
-    NSArray *species = [dataManager fetchSpeciesWithPredicate:predicate];
-    
-    FamilyListViewController *listVC = [[FamilyListViewController alloc] init];
-    listVC.title = familyName;
-    listVC.species = species;
-    [self.navigationController pushViewController:listVC animated:YES];
+    TaxonomyExplorerViewController *taxonomyVC = [[TaxonomyExplorerViewController alloc] init];
+    taxonomyVC.currentLevel = TaxonomyLevelGenus;
+    taxonomyVC.parentObject = family;
+    taxonomyVC.title = familyName;
+    [self.navigationController pushViewController:taxonomyVC animated:YES];
 }
 
 - (void)recentTapped:(RecentSpeciesView *)sender {

@@ -26,6 +26,7 @@
 
 @property (nonatomic, strong) NSManagedObject *speciesA;
 @property (nonatomic, strong) NSManagedObject *speciesB;
+@property (nonatomic, assign) NSInteger selectedSide;
 
 @end
 
@@ -102,7 +103,6 @@
     self.vsLabel.textColor = [UIColor systemGray3Color];
     self.vsLabel.textAlignment = NSTextAlignmentCenter;
     [selectionStack addArrangedSubview:self.vsLabel];
-    [self.vsLabel.widthAnchor constraintEqualToConstant:30].active = YES;
     
     // Species B selection
     self.selectionAreaB = [self createSelectionAreaWithTitle:@"Species B" side:@"B"];
@@ -184,6 +184,7 @@
     self.comparisonView.translatesAutoresizingMaskIntoConstraints = NO;
     self.comparisonView.hidden = YES;
     [self.stackView addArrangedSubview:self.comparisonView];
+    [self.comparisonView.heightAnchor constraintGreaterThanOrEqualToConstant:400].active = YES;
 }
 
 #pragma mark - Actions
@@ -196,8 +197,10 @@
     
     if (sender == self.selectAButton) {
         navController.title = @"Select Species A";
+        self.selectedSide = 0; // A
     } else {
         navController.title = @"Select Species B";
+        self.selectedSide = 1; // B
     }
     
     [self presentViewController:navController animated:YES completion:nil];
@@ -231,19 +234,17 @@
 #pragma mark - SpeciesSelectionDelegate
 
 - (void)speciesSelectionViewController:(SpeciesSelectionViewController *)controller didSelectSpecies:(NSManagedObject *)species {
-    // Determine which side to update based on which button was tapped
-    // We'll use a simple approach: if speciesA is empty, fill A, else fill B
-    if (!self.speciesA) {
-        self.speciesA = species;
-    } else if (!self.speciesB) {
-        self.speciesB = species;
-    } else {
-        // Both filled, replace the one that was being changed
-        // For simplicity, replace B
-        self.speciesB = species;
-    }
-    
-    [self updateUI];
+    // Dismiss the modal first
+    [self dismissViewControllerAnimated:YES completion:^{
+        // Then update the correct side
+        if (self.selectedSide == 0) {
+            self.speciesA = species;
+        } else {
+            self.speciesB = species;
+        }
+        
+        [self updateUI];
+    }];
 }
 
 @end

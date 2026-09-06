@@ -56,8 +56,13 @@
             self.title = @"Browse Taxonomy";
             break;
         case TaxonomyLevelFamily:
-            self.items = [dataManager fetchFamiliesForOrder:self.parentObject];
-            self.title = [self.parentObject valueForKey:@"name"];
+            if (self.parentObject) {
+                self.items = [dataManager fetchFamiliesForOrder:self.parentObject];
+                self.title = [self.parentObject valueForKey:@"name"];
+            } else {
+                self.items = [dataManager fetchFamilies];
+                self.title = @"Browse Taxonomy";
+            }
             break;
         case TaxonomyLevelGenus:
             self.items = [dataManager fetchGeneraForFamily:self.parentObject];
@@ -82,7 +87,12 @@
     TaxonomyLevelCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TaxonomyLevelCell" forIndexPath:indexPath];
     
     NSManagedObject *object = self.items[indexPath.row];
-    NSString *name = [object valueForKey:@"name"] ?: [object valueForKey:@"commonName"];
+    NSString *name;
+    if (self.currentLevel == TaxonomyLevelSpecies) {
+        name = [object valueForKey:@"commonName"];
+    } else {
+        name = [object valueForKey:@"name"];
+    }
     NSString *subtitle = [self subtitleForObject:object];
     NSString *countText = [self countTextForObject:object];
     NSString *iconName = [self iconNameForCurrentLevel];

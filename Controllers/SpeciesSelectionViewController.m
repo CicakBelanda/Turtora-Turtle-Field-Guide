@@ -99,7 +99,6 @@
     
     NSManagedObject *selectedSpecies = self.filteredSpecies[indexPath.row];
     [self.delegate speciesSelectionViewController:self didSelectSpecies:selectedSpecies];
-    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - UISearchResultsUpdating
