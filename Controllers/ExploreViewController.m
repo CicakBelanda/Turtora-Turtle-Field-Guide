@@ -114,12 +114,16 @@
     SectionHeaderView *headerView = [[SectionHeaderView alloc] initWithTitle:@"Featured Species"];
     [self.stackView addArrangedSubview:headerView];
     
-    // Collection view layout
+    // Collection view layout - App Store style with equal peeking on both sides
+    CGFloat screenWidth = self.view.frame.size.width;
+    CGFloat collectionViewWidth = screenWidth - 32; // stack view 16px margins each side
+    CGFloat cardWidth = collectionViewWidth - 40; // 20px peeking on each side when centered
+    CGFloat sideInset = 20;
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-    layout.itemSize = CGSizeMake([UIScreen mainScreen].bounds.size.width - 32, 220);
+    layout.itemSize = CGSizeMake(cardWidth, cardWidth * 0.6);
     layout.minimumInteritemSpacing = 12;
-    layout.sectionInset = UIEdgeInsetsMake(0, 20, 0, 20);
+    layout.sectionInset = UIEdgeInsetsMake(0, sideInset, 0, sideInset);
     
     self.featuredCollectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
     self.featuredCollectionView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -132,7 +136,7 @@
     [self.stackView addArrangedSubview:self.featuredCollectionView];
     
     [NSLayoutConstraint activateConstraints:@[
-        [self.featuredCollectionView.heightAnchor constraintEqualToConstant:220]
+        [self.featuredCollectionView.heightAnchor constraintEqualToConstant:cardWidth * 0.6]
     ]];
     
     // Page control
@@ -146,14 +150,16 @@
 }
 
 - (void)pageControlChanged:(UIPageControl *)sender {
-    CGFloat itemWidth = [UIScreen mainScreen].bounds.size.width - 32 + 12;
+    CGFloat cardWidth = (self.view.frame.size.width - 32) - 40;
+    CGFloat itemWidth = cardWidth + 12;
     CGFloat x = sender.currentPage * itemWidth;
     [self.featuredCollectionView setContentOffset:CGPointMake(x, 0) animated:YES];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if (scrollView == self.featuredCollectionView) {
-        CGFloat itemWidth = [UIScreen mainScreen].bounds.size.width - 32 + 12;
+        CGFloat cardWidth = (self.view.frame.size.width - 32) - 40;
+        CGFloat itemWidth = cardWidth + 12;
         NSInteger page = round(scrollView.contentOffset.x / itemWidth);
         self.pageControl.currentPage = page;
     }
@@ -161,7 +167,8 @@
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
     if (scrollView == self.featuredCollectionView) {
-        CGFloat itemWidth = [UIScreen mainScreen].bounds.size.width - 32 + 12;
+        CGFloat cardWidth = (self.view.frame.size.width - 32) - 40;
+        CGFloat itemWidth = cardWidth + 12;
         CGFloat targetX = targetContentOffset->x;
         NSInteger page = round(targetX / itemWidth);
         targetContentOffset->x = page * itemWidth;
