@@ -92,8 +92,11 @@
     self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
     self.searchController.searchResultsUpdater = self;
     self.searchController.obscuresBackgroundDuringPresentation = NO;
+    self.searchController.hidesNavigationBarDuringPresentation = NO;
     self.searchController.searchBar.placeholder = @"Search species, family, genus...";
     self.searchController.searchBar.searchBarStyle = UISearchBarStyleMinimal;
+    
+    self.definesPresentationContext = YES;
     
     UIView *searchContainer = [[UIView alloc] init];
     searchContainer.translatesAutoresizingMaskIntoConstraints = NO;
@@ -183,15 +186,25 @@
     SectionHeaderView *headerView = [[SectionHeaderView alloc] initWithTitle:@"Browse by Habitat"];
     [self.stackView addArrangedSubview:headerView];
     
+    // Horizontal scroll view for habitat cards
+    UIScrollView *scrollView = [[UIScrollView alloc] init];
+    scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    scrollView.showsHorizontalScrollIndicator = NO;
+    [self.stackView addArrangedSubview:scrollView];
+    
     self.habitatStackView = [[UIStackView alloc] init];
     self.habitatStackView.translatesAutoresizingMaskIntoConstraints = NO;
     self.habitatStackView.axis = UILayoutConstraintAxisHorizontal;
-    self.habitatStackView.distribution = UIStackViewDistributionFillEqually;
     self.habitatStackView.spacing = 12;
-    [self.stackView addArrangedSubview:self.habitatStackView];
+    [scrollView addSubview:self.habitatStackView];
     
     [NSLayoutConstraint activateConstraints:@[
-        [self.habitatStackView.heightAnchor constraintEqualToConstant:100]
+        [scrollView.heightAnchor constraintEqualToConstant:100],
+        [self.habitatStackView.topAnchor constraintEqualToAnchor:scrollView.topAnchor],
+        [self.habitatStackView.leadingAnchor constraintEqualToAnchor:scrollView.leadingAnchor],
+        [self.habitatStackView.trailingAnchor constraintEqualToAnchor:scrollView.trailingAnchor],
+        [self.habitatStackView.bottomAnchor constraintEqualToAnchor:scrollView.bottomAnchor],
+        [self.habitatStackView.heightAnchor constraintEqualToAnchor:scrollView.heightAnchor]
     ]];
 }
 

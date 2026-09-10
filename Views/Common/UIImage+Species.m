@@ -31,10 +31,35 @@
     // Try to load from bundle
     NSString *filePath = [[NSBundle mainBundle] pathForResource:filename ofType:nil];
     if (filePath) {
-        return [UIImage imageWithContentsOfFile:filePath];
+        // Downsample to prevent memory crashes with large images
+        return [self downsampledImageWithPath:filePath];
     }
     
     return nil;
+}
+
++ (UIImage *)downsampledImageWithPath:(NSString *)path {
+    NSURL *url = [NSURL fileURLWithPath:path];
+    CGImageSourceRef source = CGImageSourceCreateWithURL((__bridge CFURLRef)url, NULL);
+    if (!source) return nil;
+    
+    // Target size: max 300px wide/tall (enough for display)
+    const CGFloat maxDimension = 300.0;
+    CFDictionaryRef options = (__bridge CFDictionaryRef)@{
+        (id)kCGImageSourceThumbnailMaxPixelSize: @(maxDimension),
+        (id)kCGImageSourceCreateThumbnailFromImageAlways: @YES,
+        (id)kCGImageSourceCreateThumbnailWithTransform: @YES,
+    };
+    
+    CGImageRef thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, options);
+    CFRelease(source);
+    
+    if (!thumbnail) return nil;
+    
+    UIImage *image = [UIImage imageWithCGImage:thumbnail];
+    CGImageRelease(thumbnail);
+    
+    return image;
 }
 
 @end

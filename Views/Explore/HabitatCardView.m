@@ -66,7 +66,8 @@
         [self.stackView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
         [self.stackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
         [self.iconView.widthAnchor constraintEqualToConstant:28],
-        [self.iconView.heightAnchor constraintEqualToConstant:28]
+        [self.iconView.heightAnchor constraintEqualToConstant:28],
+        [self.widthAnchor constraintEqualToConstant:120]
     ]];
 }
 
