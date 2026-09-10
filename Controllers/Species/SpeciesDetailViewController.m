@@ -8,6 +8,7 @@
 #import "SpeciesDetailViewController.h"
 #import "DataManager.h"
 #import "Constants.h"
+#import "UIImage+Species.h"
 
 @interface SpeciesDetailViewController ()
 
@@ -72,6 +73,15 @@
     imageView.tintColor = TURTORA_PRIMARY_GREEN;
     imageView.layer.cornerRadius = TURTORA_RADIUS_LARGE;
     imageView.accessibilityIdentifier = @"SpeciesImage";
+    
+    // Load real photo if available
+    NSString *imageName = [self.species valueForKey:@"imageName"];
+    UIImage *photo = [UIImage speciesImageForImageName:imageName];
+    if (photo) {
+        imageView.image = photo;
+        imageView.tintColor = nil;
+    }
+    
     [self.stackView addArrangedSubview:imageView];
     [imageView.heightAnchor constraintEqualToConstant:200].active = YES;
     

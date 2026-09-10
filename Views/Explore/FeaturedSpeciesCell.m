@@ -7,6 +7,7 @@
 
 #import "FeaturedSpeciesCell.h"
 #import "Constants.h"
+#import "UIImage+Species.h"
 
 @interface FeaturedSpeciesCell ()
 
@@ -115,6 +116,17 @@
 - (void)configureWithSpecies:(NSManagedObject *)species {
     self.commonNameLabel.text = [species valueForKey:@"commonName"];
     self.scientificNameLabel.text = [species valueForKey:@"scientificName"];
+    
+    // Load real photo if available
+    NSString *imageName = [species valueForKey:@"imageName"];
+    UIImage *photo = [UIImage speciesImageForImageName:imageName];
+    if (photo) {
+        self.speciesImageView.image = photo;
+        self.speciesImageView.tintColor = nil;
+    } else {
+        self.speciesImageView.image = [UIImage systemImageNamed:@"tortoise.fill"];
+        self.speciesImageView.tintColor = TURTORA_PRIMARY_GREEN;
+    }
     
     // Accessibility
     self.accessibilityLabel = [NSString stringWithFormat:@"%@, %@", [species valueForKey:@"commonName"], [species valueForKey:@"scientificName"]];

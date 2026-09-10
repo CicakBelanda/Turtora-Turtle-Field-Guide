@@ -114,7 +114,11 @@
     SectionHeaderView *headerView = [[SectionHeaderView alloc] initWithTitle:@"Featured Species"];
     [self.stackView addArrangedSubview:headerView];
     
-    // Collection view layout - App Store style with equal peeking on both sides
+    // Collection view layout
+    //    ScrollView(.horizontal) {
+    //        LazyHStack { ForEach(cards) { CardView($0) } }
+    //    }
+    //    .scrollTargetBehavior(.viewAligned)
     CGFloat screenWidth = self.view.frame.size.width;
     CGFloat collectionViewWidth = screenWidth - 32; // stack view 16px margins each side
     CGFloat cardWidth = collectionViewWidth - 40; // 20px peeking on each side when centered
@@ -264,11 +268,12 @@
         }
     }
     
-    NSArray *categories = @[@"Marine Turtle", @"Freshwater Turtle", @"Tortoise"];
+    NSArray *categories = @[@"Sea Turtle", @"Freshwater Turtle", @"Tortoise", @"Softshell Turtle"];
     NSDictionary *icons = @{
-        @"Marine Turtle": @"water.waves",
+        @"Sea Turtle": @"water.waves",
         @"Freshwater Turtle": @"drop.fill",
-        @"Tortoise": @"leaf.fill"
+        @"Tortoise": @"leaf.fill",
+        @"Softshell Turtle": @"tortoise.fill"
     };
     
     for (NSString *category in categories) {

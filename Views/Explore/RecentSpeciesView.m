@@ -7,6 +7,7 @@
 
 #import "RecentSpeciesView.h"
 #import "Constants.h"
+#import "UIImage+Species.h"
 
 @interface RecentSpeciesView ()
 
@@ -38,6 +39,15 @@
     self.imageView.backgroundColor = TURTORA_LIGHT_GREEN;
     self.imageView.image = [UIImage systemImageNamed:@"tortoise.fill"];
     self.imageView.tintColor = TURTORA_PRIMARY_GREEN;
+    
+    // Load real photo if available
+    NSString *imageName = [self.species valueForKey:@"imageName"];
+    UIImage *photo = [UIImage speciesImageForImageName:imageName];
+    if (photo) {
+        self.imageView.image = photo;
+        self.imageView.tintColor = nil;
+    }
+    
     [self addSubview:self.imageView];
     
     self.nameLabel = [[UILabel alloc] init];

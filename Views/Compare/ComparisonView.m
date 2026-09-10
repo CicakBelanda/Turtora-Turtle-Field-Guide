@@ -6,6 +6,7 @@
 //
 
 #import "ComparisonView.h"
+#import "UIImage+Species.h"
 
 @interface ComparisonView ()
 
@@ -139,8 +140,24 @@
     self.speciesANameLabel.text = [speciesA valueForKey:@"commonName"];
     self.speciesAScientificLabel.text = [speciesA valueForKey:@"scientificName"];
     
+    // Load real photo for species A
+    NSString *imageNameA = [speciesA valueForKey:@"imageName"];
+    UIImage *photoA = [UIImage speciesImageForImageName:imageNameA];
+    if (photoA) {
+        self.speciesAImageView.image = photoA;
+        self.speciesAImageView.tintColor = nil;
+    }
+    
     self.speciesBNameLabel.text = [speciesB valueForKey:@"commonName"];
     self.speciesBScientificLabel.text = [speciesB valueForKey:@"scientificName"];
+    
+    // Load real photo for species B
+    NSString *imageNameB = [speciesB valueForKey:@"imageName"];
+    UIImage *photoB = [UIImage speciesImageForImageName:imageNameB];
+    if (photoB) {
+        self.speciesBImageView.image = photoB;
+        self.speciesBImageView.tintColor = nil;
+    }
     
     // Remove previous attribute rows
     NSArray *arrangedSubviews = [self.stackView.arrangedSubviews copy];
