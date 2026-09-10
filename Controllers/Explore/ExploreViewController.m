@@ -57,8 +57,20 @@
 #pragma mark - Setup
 
 - (void)setupNavigationBar {
-    UIBarButtonItem *menuButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] style:UIBarButtonItemStylePlain target:self action:@selector(menuTapped)];
+    UIBarButtonItem *menuButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis.circle"] style:UIBarButtonItemStylePlain target:nil action:nil];
+    
+    menuButton.menu = [UIMenu menuWithTitle:@"" children:@[
+        [UIAction actionWithTitle:@"About" image:[UIImage systemImageNamed:@"info.circle"] identifier:nil handler:^(__kindof UIAction *action) {
+            AboutViewController *aboutVC = [[AboutViewController alloc] init];
+            [self.navigationController pushViewController:aboutVC animated:YES];
+        }]
+    ]];
+    
     self.navigationItem.rightBarButtonItem = menuButton;
+}
+
+- (void)menuTapped {
+    // Menu is now handled by UIMenu on the bar button item
 }
 
 - (void)setupScrollView {
@@ -341,19 +353,6 @@
 }
 
 #pragma mark - Actions
-
-- (void)menuTapped {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"About" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        AboutViewController *aboutVC = [[AboutViewController alloc] init];
-        [self.navigationController pushViewController:aboutVC animated:YES];
-    }]];
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-    
-    [self presentViewController:alert animated:YES completion:nil];
-}
 
 - (void)habitatTapped:(HabitatCardView *)sender {
     NSString *category = sender.title;
