@@ -43,8 +43,8 @@
     CGImageSourceRef source = CGImageSourceCreateWithURL((__bridge CFURLRef)url, NULL);
     if (!source) return nil;
     
-    // Target size: max 300px wide/tall (enough for display)
-    const CGFloat maxDimension = 300.0;
+    // Target size: max 200px (prevents IOSurface allocation failures)
+    const CGFloat maxDimension = 200.0;
     CFDictionaryRef options = (__bridge CFDictionaryRef)@{
         (id)kCGImageSourceThumbnailMaxPixelSize: @(maxDimension),
         (id)kCGImageSourceCreateThumbnailFromImageAlways: @YES,
@@ -56,10 +56,17 @@
     
     if (!thumbnail) return nil;
     
+    // Create UIImage and force decode to prevent IOSurface issues
     UIImage *image = [UIImage imageWithCGImage:thumbnail];
     CGImageRelease(thumbnail);
     
-    return image;
+    // Force decode by drawing into a context
+    UIGraphicsBeginImageContextWithOptions(image.size, YES, 1.0);
+    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    UIImage *decodedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return decodedImage ?: image;
 }
 
 @end
