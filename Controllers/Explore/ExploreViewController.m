@@ -346,8 +346,7 @@
 }
 
 - (void)habitatTapped:(HabitatCardView *)sender {
-    NSArray *categories = @[@"Marine Turtle", @"Freshwater Turtle", @"Tortoise"];
-    NSString *category = categories[sender.tag];
+    NSString *category = sender.title;
     
     DataManager *dataManager = [DataManager sharedManager];
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category == %@", category];
