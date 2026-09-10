@@ -82,7 +82,7 @@
         [self.stackView.bottomAnchor constraintEqualToAnchor:self.scrollView.bottomAnchor],
         [self.stackView.widthAnchor constraintEqualToAnchor:self.scrollView.widthAnchor],
         
-        [headersStack.heightAnchor constraintEqualToConstant:140]
+        [headersStack.heightAnchor constraintEqualToConstant:100]
     ]];
 }
 
@@ -126,18 +126,18 @@
     [headerView addSubview:scientificLabel];
     
     [NSLayoutConstraint activateConstraints:@[
-        [imageView.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:12],
-        [imageView.leadingAnchor constraintEqualToAnchor:headerView.leadingAnchor constant:12],
-        [imageView.widthAnchor constraintEqualToConstant:64],
-        [imageView.heightAnchor constraintEqualToConstant:64],
+        [imageView.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:10],
+        [imageView.leadingAnchor constraintEqualToAnchor:headerView.leadingAnchor constant:10],
+        [imageView.bottomAnchor constraintEqualToAnchor:headerView.bottomAnchor constant:-10],
+        [imageView.widthAnchor constraintEqualToConstant:80],
         
-        [nameLabel.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:12],
+        [nameLabel.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:10],
         [nameLabel.leadingAnchor constraintEqualToAnchor:imageView.trailingAnchor constant:10],
-        [nameLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-12],
+        [nameLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-10],
         
         [scientificLabel.topAnchor constraintEqualToAnchor:nameLabel.bottomAnchor constant:4],
         [scientificLabel.leadingAnchor constraintEqualToAnchor:imageView.trailingAnchor constant:10],
-        [scientificLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-12]
+        [scientificLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-10]
     ]];
     
     return headerView;
