@@ -13,6 +13,7 @@
 
 @property (nonatomic, strong) UIImageView *imageView;
 @property (nonatomic, strong) UILabel *nameLabel;
+@property (nonatomic, copy) NSString *currentImageName;
 
 @end
 
@@ -42,10 +43,19 @@
     
     // Load real photo if available
     NSString *imageName = [self.species valueForKey:@"imageName"];
-    UIImage *photo = [UIImage speciesImageForImageName:imageName];
-    if (photo) {
-        self.imageView.image = photo;
-        self.imageView.tintColor = nil;
+    self.currentImageName = imageName;
+    
+    if (imageName) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            UIImage *photo = [UIImage speciesImageForImageName:imageName];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if ([self.currentImageName isEqualToString:imageName] && photo) {
+                    self.imageView.image = photo;
+                    self.imageView.tintColor = nil;
+                }
+            });
+        });
     }
     
     [self addSubview:self.imageView];

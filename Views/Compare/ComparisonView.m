@@ -21,6 +21,8 @@
 @property (nonatomic, strong) UILabel *speciesBScientificLabel;
 @property (nonatomic, strong) UIImageView *speciesAImageView;
 @property (nonatomic, strong) UIImageView *speciesBImageView;
+@property (nonatomic, copy) NSString *currentImageNameA;
+@property (nonatomic, copy) NSString *currentImageNameB;
 
 @end
 
@@ -148,23 +150,45 @@
     self.speciesANameLabel.text = [speciesA valueForKey:@"commonName"];
     self.speciesAScientificLabel.text = [speciesA valueForKey:@"scientificName"];
     
-    // Load real photo for species A
+    // Reset image to placeholder
+    self.speciesAImageView.image = [UIImage systemImageNamed:@"tortoise.fill"];
+    self.speciesAImageView.tintColor = TURTORA_PRIMARY_GREEN;
+    
     NSString *imageNameA = [speciesA valueForKey:@"imageName"];
-    UIImage *photoA = [UIImage speciesImageForImageName:imageNameA];
-    if (photoA) {
-        self.speciesAImageView.image = photoA;
-        self.speciesAImageView.tintColor = nil;
+    self.currentImageNameA = imageNameA;
+    
+    if (imageNameA) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            UIImage *photo = [UIImage speciesImageForImageName:imageNameA];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if ([self.currentImageNameA isEqualToString:imageNameA] && photo) {
+                    self.speciesAImageView.image = photo;
+                    self.speciesAImageView.tintColor = nil;
+                }
+            });
+        });
     }
     
     self.speciesBNameLabel.text = [speciesB valueForKey:@"commonName"];
     self.speciesBScientificLabel.text = [speciesB valueForKey:@"scientificName"];
     
-    // Load real photo for species B
+    // Reset image to placeholder
+    self.speciesBImageView.image = [UIImage systemImageNamed:@"tortoise.fill"];
+    self.speciesBImageView.tintColor = TURTORA_PRIMARY_GREEN;
+    
     NSString *imageNameB = [speciesB valueForKey:@"imageName"];
-    UIImage *photoB = [UIImage speciesImageForImageName:imageNameB];
-    if (photoB) {
-        self.speciesBImageView.image = photoB;
-        self.speciesBImageView.tintColor = nil;
+    self.currentImageNameB = imageNameB;
+    
+    if (imageNameB) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            UIImage *photo = [UIImage speciesImageForImageName:imageNameB];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if ([self.currentImageNameB isEqualToString:imageNameB] && photo) {
+                    self.speciesBImageView.image = photo;
+                    self.speciesBImageView.tintColor = nil;
+                }
+            });
+        });
     }
     
     // Remove previous attribute rows

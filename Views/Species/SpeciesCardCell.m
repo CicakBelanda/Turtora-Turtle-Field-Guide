@@ -16,6 +16,7 @@
 @property (nonatomic, strong) UILabel *commonNameLabel;
 @property (nonatomic, strong) UILabel *scientificNameLabel;
 @property (nonatomic, strong) UILabel *categoryLabel;
+@property (nonatomic, copy) NSString *currentImageName;
 
 @end
 
@@ -36,8 +37,14 @@
     // Card container
     self.cardView = [[UIView alloc] init];
     self.cardView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.cardView.backgroundColor = [UIColor secondarySystemBackgroundColor];
+    self.cardView.backgroundColor = [UIColor whiteColor];
     self.cardView.layer.cornerRadius = TURTORA_RADIUS_MEDIUM;
+    self.cardView.layer.borderWidth = 0.5;
+    self.cardView.layer.borderColor = [UIColor colorWithRed:0.85 green:0.85 blue:0.85 alpha:1.0].CGColor;
+    self.cardView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.cardView.layer.shadowOffset = CGSizeMake(0, 1);
+    self.cardView.layer.shadowRadius = 3;
+    self.cardView.layer.shadowOpacity = 0.05;
     [self.contentView addSubview:self.cardView];
     
     // Image
@@ -110,15 +117,26 @@
     self.scientificNameLabel.text = [species valueForKey:@"scientificName"];
     self.categoryLabel.text = [species valueForKey:@"category"];
     
-    // Load real photo if available
+    // Reset image to placeholder immediately
+    self.speciesImageView.image = [UIImage systemImageNamed:@"tortoise.fill"];
+    self.speciesImageView.tintColor = TURTORA_PRIMARY_GREEN;
+    
     NSString *imageName = [species valueForKey:@"imageName"];
-    UIImage *photo = [UIImage speciesImageForImageName:imageName];
-    if (photo) {
-        self.speciesImageView.image = photo;
-        self.speciesImageView.tintColor = nil;
-    } else {
-        self.speciesImageView.image = [UIImage systemImageNamed:@"tortoise.fill"];
-        self.speciesImageView.tintColor = TURTORA_PRIMARY_GREEN;
+    self.currentImageName = imageName;
+    
+    if (imageName) {
+        // Load image asynchronously to prevent main thread blocking
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            UIImage *photo = [UIImage speciesImageForImageName:imageName];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                // Verify cell hasn't been reused for different species
+                if ([self.currentImageName isEqualToString:imageName] && photo) {
+                    self.speciesImageView.image = photo;
+                    self.speciesImageView.tintColor = nil;
+                }
+            });
+        });
     }
     
     // Accessibility

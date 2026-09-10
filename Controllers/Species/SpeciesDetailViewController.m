@@ -74,12 +74,18 @@
     imageView.layer.cornerRadius = TURTORA_RADIUS_LARGE;
     imageView.accessibilityIdentifier = @"SpeciesImage";
     
-    // Load real photo if available
+    // Load real photo asynchronously
     NSString *imageName = [self.species valueForKey:@"imageName"];
-    UIImage *photo = [UIImage speciesImageForImageName:imageName];
-    if (photo) {
-        imageView.image = photo;
-        imageView.tintColor = nil;
+    if (imageName) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            UIImage *photo = [UIImage speciesImageForImageName:imageName];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (photo) {
+                    imageView.image = photo;
+                    imageView.tintColor = nil;
+                }
+            });
+        });
     }
     
     [self.stackView addArrangedSubview:imageView];
