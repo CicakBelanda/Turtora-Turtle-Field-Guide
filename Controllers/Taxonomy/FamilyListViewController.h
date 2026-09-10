@@ -12,7 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface FamilyListViewController : UIViewController
 
-@property (nonatomic, strong) NSArray *species;
+@property (nonatomic, copy, nullable) NSString *categoryFilter;
+@property (nonatomic, strong, nullable) NSArray<NSManagedObject *> *species;
 
 @end
 

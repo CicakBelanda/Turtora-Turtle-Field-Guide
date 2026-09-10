@@ -9,6 +9,7 @@
 #import "SpeciesDetailViewController.h"
 #import "SpeciesCardCell.h"
 #import "DataManager.h"
+#import "Constants.h"
 
 @interface FamilyListViewController () <UITableViewDataSource, UITableViewDelegate>
 
@@ -39,6 +40,29 @@
         [self.tableView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         [self.tableView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor]
     ]];
+    
+    [self loadSpecies];
+}
+
+- (void)loadSpecies {
+    NSString *filter = self.categoryFilter;
+    NSArray *existingSpecies = self.species;
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSArray *results;
+        if (filter) {
+            DataManager *dataManager = [DataManager sharedManager];
+            NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category == %@", filter];
+            results = [dataManager fetchSpeciesWithPredicate:predicate];
+        } else {
+            results = existingSpecies ?: @[];
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.species = results;
+            [self.tableView reloadData];
+        });
+    });
 }
 
 #pragma mark - UITableViewDataSource

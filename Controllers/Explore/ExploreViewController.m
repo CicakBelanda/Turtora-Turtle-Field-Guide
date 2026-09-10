@@ -348,13 +348,9 @@
 - (void)habitatTapped:(HabitatCardView *)sender {
     NSString *category = sender.title;
     
-    DataManager *dataManager = [DataManager sharedManager];
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"category == %@", category];
-    NSArray *species = [dataManager fetchSpeciesWithPredicate:predicate];
-    
     FamilyListViewController *listVC = [[FamilyListViewController alloc] init];
     listVC.title = category;
-    listVC.species = species;
+    listVC.categoryFilter = category;
     [self.navigationController pushViewController:listVC animated:YES];
 }
 
