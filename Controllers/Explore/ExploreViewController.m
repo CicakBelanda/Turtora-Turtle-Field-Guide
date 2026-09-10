@@ -10,6 +10,7 @@
 #import "SpeciesDetailViewController.h"
 #import "FamilyListViewController.h"
 #import "TaxonomyExplorerViewController.h"
+#import "AboutViewController.h"
 #import "FeaturedSpeciesCell.h"
 #import "HabitatCardView.h"
 #import "FamilyRowView.h"
@@ -342,7 +343,16 @@
 #pragma mark - Actions
 
 - (void)menuTapped {
-    NSLog(@"Menu tapped");
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"About" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        AboutViewController *aboutVC = [[AboutViewController alloc] init];
+        [self.navigationController pushViewController:aboutVC animated:YES];
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)habitatTapped:(HabitatCardView *)sender {

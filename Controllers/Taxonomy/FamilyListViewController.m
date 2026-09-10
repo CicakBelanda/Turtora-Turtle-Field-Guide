@@ -14,6 +14,7 @@
 @interface FamilyListViewController () <UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) UIActivityIndicatorView *loadingIndicator;
 
 @end
 
@@ -34,21 +35,32 @@
     [self.tableView registerClass:[SpeciesCardCell class] forCellReuseIdentifier:@"SpeciesCardCell"];
     [self.view addSubview:self.tableView];
     
+    // Loading indicator
+    self.loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
+    self.loadingIndicator.translatesAutoresizingMaskIntoConstraints = NO;
+    self.loadingIndicator.hidesWhenStopped = YES;
+    [self.view addSubview:self.loadingIndicator];
+    
     [NSLayoutConstraint activateConstraints:@[
         [self.tableView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
         [self.tableView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [self.tableView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-        [self.tableView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor]
+        [self.tableView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+        [self.loadingIndicator.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+        [self.loadingIndicator.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor]
     ]];
     
     [self loadSpecies];
 }
 
 - (void)loadSpecies {
+    [self.loadingIndicator startAnimating];
+    self.tableView.hidden = YES;
+    
     NSString *filter = self.categoryFilter;
     NSArray *existingSpecies = self.species;
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         NSArray *results;
         if (filter) {
             DataManager *dataManager = [DataManager sharedManager];
@@ -61,6 +73,8 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             self.species = results;
             [self.tableView reloadData];
+            [self.loadingIndicator stopAnimating];
+            self.tableView.hidden = NO;
         });
     });
 }
@@ -83,8 +97,6 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     NSManagedObject *species = self.species[indexPath.row];
-    
-    // Track as recent
     [[DataManager sharedManager] addRecentSpecies:species];
     
     SpeciesDetailViewController *detailVC = [[SpeciesDetailViewController alloc] init];
