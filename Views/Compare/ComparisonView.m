@@ -7,6 +7,7 @@
 
 #import "ComparisonView.h"
 #import "UIImage+Species.h"
+#import "Constants.h"
 
 @interface ComparisonView ()
 
@@ -42,8 +43,8 @@
     self.stackView = [[UIStackView alloc] init];
     self.stackView.translatesAutoresizingMaskIntoConstraints = NO;
     self.stackView.axis = UILayoutConstraintAxisVertical;
-    self.stackView.spacing = 16;
-    self.stackView.layoutMargins = UIEdgeInsetsMake(16, 16, 32, 16);
+    self.stackView.spacing = 12;
+    self.stackView.layoutMargins = UIEdgeInsetsMake(0, 0, 16, 0);
     self.stackView.layoutMarginsRelativeArrangement = YES;
     [self.scrollView addSubview:self.stackView];
     
@@ -81,31 +82,37 @@
         [self.stackView.bottomAnchor constraintEqualToAnchor:self.scrollView.bottomAnchor],
         [self.stackView.widthAnchor constraintEqualToAnchor:self.scrollView.widthAnchor],
         
-        [headersStack.heightAnchor constraintEqualToConstant:120]
+        [headersStack.heightAnchor constraintEqualToConstant:140]
     ]];
 }
 
 - (UIView *)createSpeciesHeaderView {
     UIView *headerView = [[UIView alloc] init];
     headerView.translatesAutoresizingMaskIntoConstraints = NO;
-    headerView.backgroundColor = [UIColor secondarySystemBackgroundColor];
-    headerView.layer.cornerRadius = 12;
+    headerView.backgroundColor = [UIColor whiteColor];
+    headerView.layer.cornerRadius = TURTORA_RADIUS_MEDIUM;
+    headerView.layer.borderWidth = 0.5;
+    headerView.layer.borderColor = [UIColor colorWithRed:0.85 green:0.85 blue:0.85 alpha:1.0].CGColor;
+    headerView.layer.shadowColor = [UIColor blackColor].CGColor;
+    headerView.layer.shadowOffset = CGSizeMake(0, 1);
+    headerView.layer.shadowRadius = 3;
+    headerView.layer.shadowOpacity = 0.05;
     
     UIImageView *imageView = [[UIImageView alloc] init];
     imageView.translatesAutoresizingMaskIntoConstraints = NO;
     imageView.contentMode = UIViewContentModeScaleAspectFill;
     imageView.clipsToBounds = YES;
-    imageView.backgroundColor = [UIColor systemGray5Color];
+    imageView.backgroundColor = TURTORA_LIGHT_GREEN;
     imageView.image = [UIImage systemImageNamed:@"tortoise.fill"];
-    imageView.tintColor = [UIColor systemGreenColor];
-    imageView.layer.cornerRadius = 8;
+    imageView.tintColor = TURTORA_PRIMARY_GREEN;
+    imageView.layer.cornerRadius = TURTORA_RADIUS_SMALL;
     imageView.tag = 100;
     [headerView addSubview:imageView];
     
     UILabel *nameLabel = [[UILabel alloc] init];
     nameLabel.translatesAutoresizingMaskIntoConstraints = NO;
     nameLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightBold];
-    nameLabel.textColor = [UIColor labelColor];
+    nameLabel.textColor = TURTORA_PRIMARY_TEXT;
     nameLabel.numberOfLines = 2;
     nameLabel.tag = 101;
     [headerView addSubview:nameLabel];
@@ -113,23 +120,24 @@
     UILabel *scientificLabel = [[UILabel alloc] init];
     scientificLabel.translatesAutoresizingMaskIntoConstraints = NO;
     scientificLabel.font = [UIFont italicSystemFontOfSize:11];
-    scientificLabel.textColor = [UIColor secondaryLabelColor];
+    scientificLabel.textColor = TURTORA_MUTED;
+    scientificLabel.numberOfLines = 2;
     scientificLabel.tag = 102;
     [headerView addSubview:scientificLabel];
     
     [NSLayoutConstraint activateConstraints:@[
-        [imageView.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:8],
-        [imageView.leadingAnchor constraintEqualToAnchor:headerView.leadingAnchor constant:8],
-        [imageView.widthAnchor constraintEqualToConstant:50],
-        [imageView.heightAnchor constraintEqualToConstant:50],
+        [imageView.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:12],
+        [imageView.leadingAnchor constraintEqualToAnchor:headerView.leadingAnchor constant:12],
+        [imageView.widthAnchor constraintEqualToConstant:64],
+        [imageView.heightAnchor constraintEqualToConstant:64],
         
-        [nameLabel.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:8],
-        [nameLabel.leadingAnchor constraintEqualToAnchor:imageView.trailingAnchor constant:8],
-        [nameLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-8],
+        [nameLabel.topAnchor constraintEqualToAnchor:headerView.topAnchor constant:12],
+        [nameLabel.leadingAnchor constraintEqualToAnchor:imageView.trailingAnchor constant:10],
+        [nameLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-12],
         
-        [scientificLabel.topAnchor constraintEqualToAnchor:nameLabel.bottomAnchor constant:2],
-        [scientificLabel.leadingAnchor constraintEqualToAnchor:imageView.trailingAnchor constant:8],
-        [scientificLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-8]
+        [scientificLabel.topAnchor constraintEqualToAnchor:nameLabel.bottomAnchor constant:4],
+        [scientificLabel.leadingAnchor constraintEqualToAnchor:imageView.trailingAnchor constant:10],
+        [scientificLabel.trailingAnchor constraintEqualToAnchor:headerView.trailingAnchor constant:-12]
     ]];
     
     return headerView;
@@ -179,47 +187,49 @@
 - (void)addComparisonRowWithTitle:(NSString *)title valueA:(NSString *)valueA valueB:(NSString *)valueB {
     UIView *rowView = [[UIView alloc] init];
     rowView.translatesAutoresizingMaskIntoConstraints = NO;
-    rowView.backgroundColor = [UIColor tertiarySystemBackgroundColor];
-    rowView.layer.cornerRadius = 8;
+    rowView.backgroundColor = [UIColor whiteColor];
+    rowView.layer.cornerRadius = TURTORA_RADIUS_SMALL;
+    rowView.layer.borderWidth = 0.5;
+    rowView.layer.borderColor = [UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.0].CGColor;
     rowView.tag = 200 + [self.stackView.arrangedSubviews count];
     
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     titleLabel.text = title;
-    titleLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightSemibold];
-    titleLabel.textColor = [UIColor secondaryLabelColor];
+    titleLabel.font = [UIFont systemFontOfSize:11 weight:UIFontWeightSemibold];
+    titleLabel.textColor = TURTORA_MUTED;
     [rowView addSubview:titleLabel];
     
     UIStackView *valuesStack = [[UIStackView alloc] init];
     valuesStack.translatesAutoresizingMaskIntoConstraints = NO;
     valuesStack.axis = UILayoutConstraintAxisHorizontal;
     valuesStack.distribution = UIStackViewDistributionFillEqually;
-    valuesStack.spacing = 8;
+    valuesStack.spacing = 12;
     [rowView addSubview:valuesStack];
     
     UILabel *valueALabel = [[UILabel alloc] init];
     valueALabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightRegular];
-    valueALabel.textColor = [UIColor labelColor];
+    valueALabel.textColor = TURTORA_PRIMARY_TEXT;
     valueALabel.numberOfLines = 0;
     valueALabel.text = valueA ?: @"N/A";
     [valuesStack addArrangedSubview:valueALabel];
     
     UILabel *valueBLabel = [[UILabel alloc] init];
     valueBLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightRegular];
-    valueBLabel.textColor = [UIColor labelColor];
+    valueBLabel.textColor = TURTORA_PRIMARY_TEXT;
     valueBLabel.numberOfLines = 0;
     valueBLabel.text = valueB ?: @"N/A";
     [valuesStack addArrangedSubview:valueBLabel];
     
     [NSLayoutConstraint activateConstraints:@[
-        [titleLabel.topAnchor constraintEqualToAnchor:rowView.topAnchor constant:8],
+        [titleLabel.topAnchor constraintEqualToAnchor:rowView.topAnchor constant:10],
         [titleLabel.leadingAnchor constraintEqualToAnchor:rowView.leadingAnchor constant:12],
         [titleLabel.trailingAnchor constraintEqualToAnchor:rowView.trailingAnchor constant:-12],
         
-        [valuesStack.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:4],
+        [valuesStack.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:6],
         [valuesStack.leadingAnchor constraintEqualToAnchor:rowView.leadingAnchor constant:12],
         [valuesStack.trailingAnchor constraintEqualToAnchor:rowView.trailingAnchor constant:-12],
-        [valuesStack.bottomAnchor constraintEqualToAnchor:rowView.bottomAnchor constant:-8]
+        [valuesStack.bottomAnchor constraintEqualToAnchor:rowView.bottomAnchor constant:-10]
     ]];
     
     [self.stackView addArrangedSubview:rowView];
